@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Sales Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+/* 1. CORE THEME & SETUP */
+:root {
+    --primary-blue: #0A1A44; /* Deep Blue */
+    --accent-teal: #00A6A6; /* Teal */
+    --accent-turquoise: #27D7C4; /* Turquoise */
+    --text-white: #FFFFFF;
+    --text-muted: #CBD5E1;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --gradient-glow: radial-gradient(circle at top right, rgba(39, 215, 196, 0.15), transparent 60%);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #050A1F; /* Very dark blue/black background */
+    /* FIX: Changed to column flex direction and added vertical padding for better flow in previews */
+    display: flex;
+    flex-direction: column; /* Stack slides vertically */
+    align-items: center; /* Center slides horizontally */
+    min-height: 100vh;
+    padding: 40px 20px; /* Increased vertical padding */
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-white);
+}
+
+.slide-container {
+    /* Use max-width and aspect ratio for better scaling */
+    width: 100%;
+    max-width: 1280px;
+    aspect-ratio: 16 / 9; /* Standard presentation ratio */
+    height: auto; /* Let height adjust based on aspect ratio */
+
+    background: var(--primary-blue);
+    background-image: var(--gradient-glow);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 4%; /* Use percentage for padding to scale content */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    margin-bottom: 40px; /* Added spacing between stacked slides */
+}
+
+/* 2. TYPOGRAPHY - Adjusted sizes to be more fluid relative to container */
+h1 {
+    font-size: 5vw; /* Adjusted to scale with viewport width */
+    max-font-size: 64px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #fff, var(--accent-turquoise));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+h2.slide-title {
+    font-size: 3.3vw; /* Adjusted to scale */
+    max-font-size: 42px;
+    font-weight: 600;
+    margin-bottom: 40px;
+    position: relative;
+    padding-left: 20px;
+}
+
+h2.slide-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 4px;
+    background: var(--accent-turquoise);
+    border-radius: 2px;
+}
+
+h3 {
+    font-size: 1.9vw;
+    max-font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--accent-turquoise);
+}
+
+p, li {
+    font-size: 1.4vw;
+    max-font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+strong {
+    color: var(--text-white);
+    font-weight: 600;
+}
+
+/* 3. LAYOUT UTILITIES */
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    height: 100%;
+    align-items: center;
+}
+
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 30px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* 4. COMPONENTS */
+
+/* Tiled Grid */
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.tile {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.tile:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-turquoise);
+}
+
+.tile i {
+    font-size: 32px;
+    color: var(--accent-turquoise);
+    margin-bottom: 15px;
+}
+
+.tile h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.tile p {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* SQL Box */
+.sql-box {
+    background: #050A1F;
+    border-left: 4px solid var(--accent-teal);
+    padding: 20px;
+    font-family: 'Consolas', monospace;
+    font-size: 1.1vw; /* Adjusted to scale */
+    max-font-size: 14px;
+    color: #A5B4FC;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto; /* Ensure horizontal scroll if code is too long */
+}
+
+/* Charts */
+.bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.bar-label {
+    width: 120px;
+    text-align: right;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.bar-track {
+    flex: 1;
+    height: 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-teal), var(--accent-turquoise));
+    border-radius: 6px;
+}
+
+.bar-value {
+    width: 60px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-turquoise);
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+th {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--accent-turquoise);
+    font-weight: 600;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text-muted);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Images */
+.img-container {
+    border-radius: 16px;
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+.img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Bleed Image Layout */
+.slide-container.bleed {
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.bleed-content {
+    padding: 4%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.bleed-img {
+    height: 100%;
+    position: relative;
+}
+
+.bleed-img img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+}
+
+/* Lists */
+ul.feature-list {
+    list-style: none;
+}
+
+ul.feature-list li {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 15px;
+}
+
+ul.feature-list li::before {
+    content: '\f00c'; /* Check icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    color: var(--accent-turquoise);
+}
+
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title Slide -->
+<div class="slide-container" id="slide1">
+    <div class="content-area" style="text-align: left; align-items: flex-start; max-width: 800px;">
+        <div style="display: inline-flex; align-items: center; gap: 10px; background: rgba(39, 215, 196, 0.1); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--accent-teal); margin-bottom: 30px;">
+            <i class="fa-solid fa-database" style="color: var(--accent-turquoise);"></i>
+            <span style="color: var(--accent-turquoise); font-size: 1.1vw; font-weight: 600; text-transform: uppercase;">SQL Project Portfolio</span>
+        </div>
+        <h1>E-Commerce Sales<br>Analysis using SQL</h1>
+        <p style="font-size: 1.9vw; color: var(--text-muted); margin-top: 20px; max-width: 600px;">
+            Data-driven insights that improve personalization, retention, and customer lifetime value (CLV).
+        </p>
+    </div>
+</div>
+
+<!-- Slide 2: Executive Summary -->
+<div class="slide-container" id="slide2">
+    <h2 class="slide-title">Executive Summary</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px; color: var(--text-white);">Project Overview</h3>
+                <p style="margin-bottom: 20px;">
+                    This project analyzes <strong>customer behavior</strong>, <strong>product performance</strong>, <strong>sales trends</strong>, and <strong>inventory patterns</strong> using SQL.
+                </p>
+                <p>
+                    The goal is to help stakeholders make data-driven decisions in marketing, inventory planning, and sales optimization using four core datasets: <span style="color: var(--accent-turquoise);">Customers, Products, Orders, and OrderDetails</span>.
+                </p>
+            </div>
+            <div class="img-container">
+                <img src="https://placehold.co/600x400/0A1A44/27D7C4?text=Data+Analysis+Dashboard" alt="Data Analytics Dashboard Visualization" onerror="this.onerror=null;this.src='https://placehold.co/600x400/0A1A44/27D7C4?text=Data+Analysis+Dashboard'">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Business Context & Pillars -->
+<div class="slide-container" id="slide3">
+    <h2 class="slide-title">Business Context</h2>
+    <p style="margin-bottom: 40px; max-width: 900px;">
+        Our e-commerce company relies on transforming raw database information into insights. As a data analyst, my responsibility is to support:
+    </p>
+    <div class="content-area">
+        <div class="grid-4">
+            <div class="tile">
+                <i class="fa-solid fa-users-viewfinder"></i>
+                <h4>Customer Insights</h4>
+                <p>Demographics & Behavior</p>
+            </div>
+            <div class="tile">
+                <i class="fa-solid fa-boxes-packing"></i>
+                <h4>Product Analysis</h4>
+                <p>Best Sellers & Trends</p>
+            </div>
+            <div class="tile">
+                <i class="fa-solid fa-chart-line"></i>
+                <h4>Sales Optimization</h4>
+                <p>Revenue & Growth</p>
+            </div>
+            <div class="tile">
+                <i class="fa-solid fa-warehouse"></i>
+                <h4>Inventory Mgmt</h4>
+                <p>Stock Levels</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 4: Data Foundation (Bleed Layout) -->
+<div class="slide-container bleed" id="slide4">
+    <div class="bleed-content">
+        <h2 class="slide-title" style="margin-bottom: 30px;">Key Objectives</h2>
+        <ul class="feature-list">
+            <li>Identify <strong>high-value customers</strong> who contribute the most to revenue.</li>
+            <li>Segment customers based on behavior, location, and buying patterns.</li>
+            <li>Understand <strong>customer retention</strong> and purchase frequency.</li>
+            <li>Detect emerging markets or high-growth customer regions.</li>
+            <li>Support marketing strategies for personalized offers and promotions.</li>
+        </ul>
+    </div>
+    <div class="bleed-img">
+        <img src="1.png" onerror="this.onerror=null;this.src='https://placehold.co/640x720/0A1A44/27D7C4?text=Data+Relationship+Diagram'">
+    </div>
+</div>
+
+<!-- Slide 5: Section Title - Customer Insights -->
+<div class="slide-container" id="slide5">
+    <div class="content-area" style="align-items: center; text-align: center;">
+        <i class="fa-solid fa-magnifying-glass-chart" style="font-size: 60px; color: var(--accent-turquoise); margin-bottom: 30px;"></i>
+        <h1 style="font-size: 6.25vw; max-font-size: 80px; margin-bottom: 20px;">Customer Insights</h1>
+        <p style="font-size: 1.9vw; color: var(--accent-teal);">Understanding Our Customer Base</p>
+    </div>
+</div>
+
+<!-- Slide 6: Demographics & Location -->
+<div class="slide-container" id="slide6">
+    <h2 class="slide-title">Demographics & Location Analysis</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <p style="margin-bottom: 15px;"><strong>Goal:</strong> Find which cities have the highest number of customers to plan targeted marketing.</p>
+                <div class="sql-box">
+SELECT location, COUNT(customer_id) AS total_customers<br>
+FROM Customers<br>
+GROUP BY location<br>
+ORDER BY total_customers DESC;
+                </div>
+                <div class="glass-card" style="height: auto; padding: 20px;">
+                    <h4 style="color: var(--accent-turquoise); margin-bottom: 10px;">SQL Results</h4>
+                    <div class="bar-chart">
+                        <!-- Data is mocked for presentation purposes -->
+                        <div class="bar-row"><div class="bar-label">Delhi</div><div class="bar-track"><div class="bar-fill" style="width: 100%;"></div></div><div class="bar-value">16%</div></div>
+                        <div class="bar-row"><div class="bar-label">Chennai</div><div class="bar-track"><div class="bar-fill" style="width: 94%;"></div></div><div class="bar-value">15%</div></div>
+                        <div class="bar-row"><div class="bar-label">Jaipur</div><div class="bar-track"><div class="bar-fill" style="width: 69%;"></div></div><div class="bar-value">11%</div></div>
+                        <div class="bar-row"><div class="bar-label">Pune</div><div class="bar-track"><div class="bar-fill" style="width: 63%;"></div></div><div class="bar-value">10%</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card" style="padding: 20px; height: auto;">
+    <h4 style="color: var(--accent-turquoise); margin-bottom: 15px;">Location-wise Customer Count</h4>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <thead>
+            <tr style="background: rgba(255,255,255,0.08);">
+                <th style="padding: 10px; color: var(--accent-turquoise); border-bottom: 1px solid var(--border-color);">Location</th>
+                <th style="padding: 10px; color: var(--accent-turquoise); border-bottom: 1px solid var(--border-color);">Total Customers</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td style="padding: 10px;">Delhi</td><td style="padding: 10px;">16</td></tr>
+            <tr><td style="padding: 10px;">Chennai</td><td style="padding: 10px;">15</td></tr>
+            <tr><td style="padding: 10px;">Jaipur</td><td style="padding: 10px;">11</td></tr>
+            <tr><td style="padding: 10px;">Pune</td><td style="padding: 10px;">10</td></tr>
+            <tr><td style="padding: 10px;">Ahmedabad</td><td style="padding: 10px;">10</td></tr>
+            <tr><td style="padding: 10px;">Lucknow</td><td style="padding: 10px;">9</td></tr>
+            <tr><td style="padding: 10px;">Hyderabad</td><td style="padding: 10px;">8</td></tr>
+            <tr><td style="padding: 10px;">Kolkata</td><td style="padding: 10px;">8</td></tr>
+            <tr><td style="padding: 10px;">Bangalore</td><td style="padding: 10px;">8</td></tr>
+            <tr><td style="padding: 10px;">Mumbai</td><td style="padding: 10px;">5</td></tr>
+        </tbody>
+    </table>
+</div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Slide 7: High-Value Customers -->
+<div class="slide-container" id="slide7">
+    <h2 class="slide-title">High-Value Customers (Top Spenders)</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                 <p style="margin-bottom: 15px;"><strong>Goal:</strong> Identify top spenders to drive loyalty programs and premium offers.</p>
+                <div class="sql-box">
+SELECT c.name, SUM(o.total_amount) AS total_spent<br>
+FROM Customers c JOIN Orders o ON c.customer_id = o.customer_id<br>
+GROUP BY c.customer_id, c.name<br>
+ORDER BY total_spent DESC LIMIT 5;
+                </div>
+                <table class="glass-card" style="display: table; height: auto;">
+                    <thead>
+                        <tr><th>ID</th><th>Name</th><th>Total Spent (INR)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>32</td><td>Romil Bora</td><td>889,000</td></tr>
+                        <tr><td>17</td><td>Rhea Issac</td><td>864,000</td></tr>
+                        <tr><td>51</td><td>Indrans Lanka</td><td>713,000</td></tr>
+                        <tr><td>24</td><td>Samar Sharaf</td><td>693,000</td></tr>
+                        <tr><td>100</td><td>Kimaya Sur</td><td>613,000</td></tr>
+                    </tbody>
+                </table>
+            </div>
+             <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                 <i class="fa-solid fa-crown" style="font-size: 80px; color: #FFD700; margin-bottom: 30px; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));"></i>
+                 <h3 style="font-size: 32px; color: #fff;">Top 5 Spenders</h3>
+                 <p>These customers drive significant revenue and are prime candidates for VIP Tiers and personalized service.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 8: Retention Analysis -->
+<div class="slide-container" id="slide8">
+    <h2 class="slide-title">Customer Retention</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="glass-card" style="padding: 20px; height: auto;">
+    <h4 style="color: var(--accent-turquoise); margin-bottom: 15px;">Customer Retention Preview</h4>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <thead>
+            <tr style="background: rgba(255,255,255,0.08);">
+                <th style="padding: 10px; color: var(--accent-turquoise); border-bottom: 1px solid var(--border-color);">Customer ID</th>
+                <th style="padding: 10px; color: var(--accent-turquoise); border-bottom: 1px solid var(--border-color);">Total Orders</th>
+                <th style="padding: 10px; color: var(--accent-turquoise); border-bottom: 1px solid var(--border-color);">Customer Type</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr><td>67</td><td>2</td><td>Repeat</td></tr>
+            <tr><td>98</td><td>3</td><td>Repeat</td></tr>
+            <tr><td>46</td><td>1</td><td>New</td></tr>
+            <tr><td>83</td><td>2</td><td>Repeat</td></tr>
+            <tr><td>99</td><td>2</td><td>Repeat</td></tr>
+            <tr><td>59</td><td>2</td><td>Repeat</td></tr>
+            <tr><td>68</td><td>5</td><td>Repeat</td></tr>
+            <tr><td>24</td><td>4</td><td>Repeat</td></tr>
+        </tbody>
+    </table>
+
+    <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;">
+        *Sample preview shown (full dataset available in SQL results)
+    </p>
+</div>
+
+            <div>
+                 <p style="margin-bottom: 15px;"><strong>Goal:</strong> Measure retention by classifying buyers based on order history (Single vs. Repeat purchase).</p>
+                <div class="sql-box">
+    SELECT 
+        customer_id, 
+        COUNT(order_id) AS total_orders,
+        CASE 
+            WHEN COUNT(order_id) = 1 THEN 'New'
+            ELSE 'Repeat'
+        END AS customer_type
+    FROM Orders
+    GROUP BY customer_id
+    ORDER BY total_orders DESC;
+</div>
+
+                <div class="grid-4" style="grid-template-columns: 1fr 1fr; margin-top: 30px;">
+                    <div class="glass-card" style="text-align: center; padding: 20px;">
+                        <h3 style="font-size: 48px; margin-bottom: 10px;">65%</h3>
+                        <p>Repeat Customers</p>
+                    </div>
+                    <div class="glass-card" style="text-align: center; padding: 20px;">
+                        <h3 style="font-size: 48px; margin-bottom: 10px;">35%</h3>
+                        <p>New/Single Purchase</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 9: Revenue Segmentation -->
+<div class="slide-container" id="slide9">
+    <h2 class="slide-title">Revenue Contribution by Segment (CLV)</h2>
+    <div class="content-area">
+        <div class="two-column" style="display: flex; gap: 30px; flex-wrap: wrap; align-items: stretch;">
+
+            <!-- Left Column: Text + SQL -->
+            <div style="flex: 1; min-width: 300px; background: rgba(10,26,68,0.5); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <p style="margin-bottom: 15px;">
+                        <strong>Goal:</strong> Segment customers into tiers (Platinum, Gold, Silver) based on total lifetime revenue.
+                    </p>
+
+                    <div class="sql-box" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; overflow-x: auto;">
+                        <pre style="color: #27D7C4; font-size: 14px;">
+WITH customer_revenue AS (
+    SELECT 
+        c.customer_id,
+        SUM(o.total_amount) AS total_revenue
+    FROM Orders o
+    JOIN Customers c ON o.customer_id = c.customer_id
+    GROUP BY c.customer_id
+)
+
+SELECT
+    CASE
+        WHEN total_revenue > 20000 THEN 'Platinum'
+        WHEN total_revenue BETWEEN 5000 AND 20000 THEN 'Gold'
+        ELSE 'Silver'
+    END AS segment,
+    COUNT(*) AS customers_in_segment,
+    SUM(total_revenue) AS revenue
+FROM customer_revenue
+GROUP BY segment
+ORDER BY revenue DESC;
+                        </pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Glass Card + Table + Feature List -->
+            <div class="glass-card" 
+                 style="flex: 1; min-width: 300px; justify-content: flex-start; text-align: center; padding: 25px; background: rgba(10,26,68,0.8); border-radius: 12px; display: flex; flex-direction: column;">
+
+                <i class="fa-solid fa-chart-pie" 
+                   style="font-size: 60px; color: var(--accent-turquoise); margin-bottom: 20px;">
+                </i>
+
+                <h3 style="color: #fff; margin-bottom: 15px;">Revenue by Customer Segments</h3>
+
+                <div style="overflow-x: auto; width: 100%;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 18px; color: #fff;">
+                        <thead>
+                            <tr style="background: rgba(255, 255, 255, 0.15);">
+                                <th style="padding: 10px;">Segment</th>
+                                <th style="padding: 10px;">Customers</th>
+                                <th style="padding: 10px;">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 10px;">Platinum</td>
+                                <td style="padding: 10px;">79</td>
+                                <td style="padding: 10px;">19,712,000</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px;">Gold</td>
+                                <td style="padding: 10px;">5</td>
+                                <td style="padding: 10px;">71,000</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px;">Silver</td>
+                                <td style="padding: 10px;">--</td>
+                                <td style="padding: 10px;">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <ul class="feature-list" style="margin-top: 25px; text-align: left; padding-left: 20px; color: #fff; font-size: 16px; line-height: 1.6;">
+                    <li><strong>Platinum Tier:</strong> High-value customers contributing the majority of total revenue.</li>
+                    <li><strong>Action:</strong> Prioritize retention, loyalty rewards, and personalized experiences.</li>
+                    
+                </ul>
+
+                <p style="font-size: 18px; margin-top: 20px; opacity: 0.85;">
+                    “Revenue is heavily dominated by Platinum customers—showing a strong high-value customer segment.”
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Slide 10: Marketing Impact -->
+<div class="slide-container bleed" id="slide10">
+    <div class="bleed-img">
+        <img src="https://placehold.co/640x720/0A1A44/27D7C4?text=Strategy+and+Action" alt="Digital Marketing Strategy Board" onerror="this.onerror=null;this.src='https://placehold.co/640x720/0A1A44/27D7C4?text=Strategy+and+Action'">
+    </div>
+    <div class="bleed-content">
+        <h2 class="slide-title">Marketing Impact: Data to Action</h2>
+        <p style="margin-bottom: 30px;">How these SQL insights translate directly into actionable business strategies:</p>
+        <div class="grid-4" style="grid-template-columns: 1fr; gap: 20px;">
+            <div style="display: flex; gap: 15px; align-items: flex-start;">
+                <i class="fa-solid fa-bullseye" style="color: var(--accent-turquoise); font-size: 24px; margin-top: 5px;"></i>
+                <div>
+                    <strong style="display: block; color: #fff; margin-bottom: 5px;">Personalized Offers</strong>
+                    <span style="font-size: 16px; color: var(--text-muted);">Tailor discounts and bundles specifically for the high-value Platinum tier.</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: flex-start;">
+                <i class="fa-solid fa-map-location-dot" style="color: var(--accent-turquoise); font-size: 24px; margin-top: 5px;"></i>
+                <div>
+                    <strong style="display: block; color: #fff; margin-bottom: 5px;">Geo-Targeting</strong>
+                    <span style="font-size: 16px; color: var(--text-muted);">Launch location-specific social media campaigns for Delhi & Chennai (highest customer count).</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: flex-start;">
+                <i class="fa-solid fa-hand-holding-heart" style="color: var(--accent-turquoise); font-size: 24px; margin-top: 5px;"></i>
+                <div>
+                    <strong style="display: block; color: #fff; margin-bottom: 5px;">Retention & Win-Back</strong>
+                    <span style="font-size: 16px; color: var(--text-muted);">Implement targeted email flows to convert 'New' customers into 'Repeat' buyers.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 11: Q&A -->
+<div class="slide-container" id="slide11">
+    <div class="content-area" style="text-align: center; align-items: center; justify-content: center;">
+        <i class="fa-regular fa-comments" style="font-size: 80px; color: var(--accent-turquoise); margin-bottom: 30px; opacity: 0.8;"></i>
+        <h1 style="font-size: 6.25vw; max-font-size: 80px; margin-bottom: 10px;">Q & A</h1>
+        <p style="font-size: 1.9vw; margin-bottom: 50px;">Thank you for your time and attention.</p>
+        
+        <div style="display: flex; gap: 60px;">
+             <div style="text-align: center;">
+                <i class="fa-solid fa-envelope" style="font-size: 32px; color: var(--accent-teal); margin-bottom: 15px;"></i>
+                <p style="color: #fff;">email@candidate.com</p>
+             </div>
+             <div style="text-align: center;">
+                <i class="fa-brands fa-linkedin" style="font-size: 32px; color: var(--accent-teal); margin-bottom: 15px;"></i>
+                <p style="color: #fff;">linkedin.com/in/profile</p>
+             </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
