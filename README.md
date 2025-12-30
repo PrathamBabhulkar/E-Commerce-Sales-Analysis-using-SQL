@@ -34,6 +34,7 @@ The project uses a relational database structure with the following tables:
 - **OrderDetails** – Contains individual product order information  
 
 ### 📊 ER Diagram
+![Database Schema](1.png)
 ![Database Schema](unnamed.png)
 
 > _Add your ER diagram image inside the `images` folder._
